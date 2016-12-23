@@ -7,6 +7,9 @@
 原文链接：http://www.jianshu.com/p/abf6551d72b3
 著作权归作者所有，转载请联系作者获得授权，并标注“简书作者”。
 
+
+** [参考链接](http://www.jianshu.com/p/abf6551d72b3) **
+
 ## 安装Mocha 和Chai
 安装Mocha：
 ```
