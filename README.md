@@ -36,3 +36,64 @@ Chai包含三种assertion方式：should方式、expect方式和assert方式。�
     重复。
 
 来看代码：
+```
+// tests/part1/cart-summary-test.js
+var chai=require('chai');
+var expect=chai.expect;
+var CartSummary=require("./../../src/part1/cart-summary");
+
+describe('cartSummary',function(){
+	it('如果传空数组进去， getSubtotal方法 将会返回0',function(){
+		var cartSummary=new CartSummary([]);
+		expect(cartSummary.getSubtotal()).to.equal(0);
+	})
+})
+```
+describe方法是用来创建一组测试的，并且可以给这一组测试一个描述。一个测试就用一个it方法。it方法的第一个参数是一个描述。第二个参数是一个包含一个或者多个assertion的方法。
+
+运行测试只需要在项目的根目录运行命令行：mocha tests －－recursive －－watch。recursive指明会找到根目录下的子目录的测试代码并运行。watch则表示Mocha会监视源代码和测试代码的更改，每次更改之后重新测试。
+![](img/1.png)
+
+我们测试不过，因为还没有完成功能代码。添加代码：
+
+```
+// src/part1/cart-summary.js
+
+function CartSummary () {};
+
+CartSummary.prototype.getSubtotal = function(){
+	return 0;
+};
+
+module.exports=CartSummary;
+function CartSummary () {};
+
+CartSummary.prototype.getSubtotal = function(){
+	return 0;
+};
+
+module.exports=CartSummary;
+```
+![](img/2.png)
+
+下一个测试：
+```
+it('这个测试返回所有商品的总价值',function(){
+	var cartSummary=new CartSummary([{
+	    id: 1,
+	    quantity: 4,
+	    price: 50
+	  }, {
+	    id: 2,
+	    quantity: 2,
+	    price: 30
+	  }, {
+	    id: 3,
+	    quantity: 1,
+	    price: 40
+	  }]);
+	expect(cartSummary.getSubtotal()).to.equal(300);
+});
+```
+这个测试时失败的。。。
+![](img/3.png)
