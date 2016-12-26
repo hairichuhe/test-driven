@@ -97,3 +97,102 @@ it('这个测试返回所有商品的总价值',function(){
 ```
 这个测试时失败的。。。
 ![](img/3.png)
+下面就来修改代码，让测试通过：
+```
+// tests/part1/cart-summary-test.js
+var chai=require('chai');
+var expect=chai.expect;
+var CartSummary=require("./../../src/part1/cart-summary");
+
+describe('cartSummary',function(){
+	it('如果传空数组进去， getSubtotal方法 将会返回0',function(){
+		var cartSummary=new CartSummary([]);
+		expect(cartSummary.getSubtotal()).to.equal(0);
+	});
+	it('这个测试返回所有商品的总价值',function(){
+		var cartSummary=new CartSummary([{
+		    id: 1,
+		    quantity: 4,
+		    price: 50
+		  }, {
+		    id: 2,
+		    quantity: 2,
+		    price: 30
+		  }, {
+		    id: 3,
+		    quantity: 1,
+		    price: 40
+		  }]);
+		expect(cartSummary.getSubtotal()).to.equal(300);
+	});
+});
+```
+![](img/4.png)
+
+## Stub和Sinon
+假设我们现在需要给CartSummary添加getTax方法。最终的使用看起来是这样的：
+```
+var cartSummary = new CartSummary([ /* ... */ ]);
+cartSummary.getTax('NY', function() {
+  // executed when the tax API request has finished
+});
+```
+getTax方法会使用量外的一个tax模块，包含一个calculate的方法。虽然我们还没有实现tax模块，但是我们还是可以完成getTax的测试。该怎么做呢？
+首先安装sinon：
+```
+npm install －－save－dev sinon
+```
+
+安装Sinon之后，我们就可以给出tax.calculate的定义了：
+
+```
+// src/part1/tax.js
+module.exports = {
+	calculate:function(subtotal,state.done){
+		//这里完成税费计算
+	}
+};
+```
+创建完成tax.calculate之后就可以使用Sinon的魔法了。用Sinon给出一个tax.calculate的零时实现。这个零时的实现就是Stub（也叫做桩）。代码：
+```
+describe('税费计算测试',function(){
+	beforeEach(function(){
+		sinon.stub(tax,'calculate',function(subtotal,state,done){
+			setTimeout(function(){
+				done({
+					amount:30
+				});
+			},0);
+		});
+	});
+
+	afterEach(function(){
+		tax.calculate.restore();
+	});
+
+	it('getTax()将会执行tax amount的回调方法',function(done){
+		var cartSummary = new CartSummary([{
+			id: 1,
+      quantity: 4,
+      price: 50
+    }, {
+      id: 2,
+      quantity: 2,
+      price: 30
+    }, {
+      id: 3,
+      quantity: 1,
+      price: 40
+		}])
+	});
+
+	cartSummary.getTax('NY',function(taxAmount){
+		expect(taxAmount).to.equal(30);
+		done();
+	})
+})
+```
+上面已经使用Sinon创建stub方法了。这里再细讲一下。使用sinon.stub方法创建Stub：
+```
+var stub = sinon.stub(object,'method',func);
+```
