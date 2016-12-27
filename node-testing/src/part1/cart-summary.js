@@ -1,16 +1,23 @@
-// src/part1/cart-summary.js
+var tax = require('./tax');
 
-function CartSummary (items) {
-	this._items=items;
-};
+function CartSummary(items) {
+	this._items = items;
+}
 
-CartSummary.prototype.getSubtotal = function(){
-	if(this._items.length){
-		return this._items.reduce(function(subtotal,item){
-			return subtotal += (item.quantity*item.price)
-		},0)
+CartSummary.prototype.getSubtotal = function() {
+	if (this._items.length) {
+		return this._items.reduce(function(subtotal, item) {
+			return subtotal += (item.quantity * item.price);
+		}, 0);
 	}
+
 	return 0;
 };
 
-module.exports=CartSummary;
+CartSummary.prototype.getTax = function(state, done) {
+	tax.calculate(this.getSubtotal(), state, function(taxInfo) {
+		done(taxInfo.amount);
+	});
+};
+
+module.exports = CartSummary;
