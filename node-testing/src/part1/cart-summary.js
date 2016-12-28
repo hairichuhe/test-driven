@@ -14,9 +14,9 @@ CartSummary.prototype.getSubtotal = function() {
 	return 0;
 };
 
-CartSummary.prototype.getTax = function(state, done) {
+CartSummary.prototype.getTax = function(state, callback) {
 	tax.calculate(this.getSubtotal(), state, function(taxInfo) {
-		done(taxInfo.amount);
+		callback(taxInfo.amount);
 	});
 };
 

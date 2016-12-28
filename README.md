@@ -3,11 +3,6 @@
 
 这里会逐步深入的讲解单元测试。首先是最简单的单元测试，没有外部依赖，只有简单的输入。接着是实用Sino框架实现stub等有依赖的测试。最后讲解如何单元测试异步代码。
 
-文／uncle_charlie（简书作者）
-原文链接：http://www.jianshu.com/p/abf6551d72b3
-著作权归作者所有，转载请联系作者获得授权，并标注“简书作者”。
-
-
 ** [参考链接](http://www.jianshu.com/p/abf6551d72b3) **
 
 ## 安装Mocha 和Chai
@@ -148,7 +143,7 @@ npm install －－save－dev sinon
 ```
 // src/part1/tax.js
 module.exports = {
-	calculate:function(subtotal,state.done){
+	calculate:function(subtotal,state.callback){
 		//这里完成税费计算
 	}
 };
@@ -157,9 +152,9 @@ module.exports = {
 ```
 describe('税费计算测试',function(){
 	beforeEach(function(){
-		sinon.stub(tax,'calculate',function(subtotal,state,done){
+		sinon.stub(tax,'calculate',function(subtotal,state,callback){
 			setTimeout(function(){
-				done({
+				callback({
 					amount:30
 				});
 			},0);
@@ -196,3 +191,93 @@ describe('税费计算测试',function(){
 ```
 var stub = sinon.stub(object,'method',func);
 ```
+给object添加一个名称为method（第二个参数）的方法，方法体的实现在第三个参数中给出。
+
+上例中使用的方法体：
+```
+function(subtotal, state, callback) {
+  setTimeout(function() {
+    callback({
+      amount: 30
+    });
+  }, 0);
+}
+```
+setTimeout方法是用来模拟真实环境的，在实际使用的时候肯定会有一个异步的网络请求来请求tax服务。方法体的替换在beforeEach里，这些代码会在测试开始之前执行。在所有测试完成之后调用afterEach，并把tax.calculate恢复到原来的模样。
+
+上面的例子也展示了如何测试异步代码。在it方法中指明一个参数（上例使用的是done）。Mocha会传入一个方法，并等待异步代码返回再结束测试。当然，这个等待是由超时时间的，一般是2000毫秒。如果异步代码的测试，没有按照上面的方法写的话，那么所有的测试都会通过。
+
+## Sinon的"间谍"
+Sinon的间谍（spy）是用来完成另外一种替身测试的（test double），它可以用来记录方法调用。包括方法的调用次数、调用的时候的参数是什么样的以及是否抛出异常。下面就是更新后的测试：
+```
+describe('cartSummary',function(){
+	beforeEach(function(){
+		sinon.stub(tax,'calculate',function(subtotal,state,callback){
+			setTimeout(function(){
+				callback({
+					amount:30
+				});
+			},0);
+		});
+	});
+
+	afterEach(function(){
+		tax.calculate.restore();
+	});
+
+
+	it('如果传空数组进去， getSubtotal方法 将会返回0',function(){
+		var cartSummary=new CartSummary([]);
+		expect(cartSummary.getSubtotal()).to.equal(0);
+	});
+	it('这个测试返回所有商品的总价值',function(){
+		var cartSummary=new CartSummary([{
+		    id: 1,
+		    quantity: 4,
+		    price: 50
+		  }, {
+		    id: 2,
+		    quantity: 2,
+		    price: 30
+		  }, {
+		    id: 3,
+		    quantity: 1,
+		    price: 40
+		  }]);
+		expect(cartSummary.getSubtotal()).to.equal(300);
+	});
+
+	it('getTax()将会执行tax amount的回调方法',function(done){
+		var cartSummary = new CartSummary([{
+			id: 1,
+	      	quantity: 4,
+	      	price: 50
+	    }, {
+	      	id: 2,
+	      	quantity: 2,
+	      	price: 30
+	    }, {
+	      	id: 3,
+	      	quantity: 1,
+	      	price: 40
+		}]);
+		cartSummary.getTax('NY',function(taxAmount){
+			expect(taxAmount).to.equal(30);
+			expect(tax.calculate.getCall(0).args[0]).to.equal(300);
+			expect(tax.calculate.getCall(0).args[1]).to.equal('NY');
+			done();
+		});
+	});
+});
+```
+在测试中添加了两个expect。getCall用来获取tax.calculate的第一次调用的第一个参数值，第二个getCall用来获取tax.calculate的第一次调用的第二个参数。主要可以用来检测被测试方法的参数是否正确。
+
+## 总结
+在本文中探讨了如何在Node中使用Mocha以及Chai和Sinon实现单元测试。希望各位喜欢。
+
+## 附件（测试案例启用流程）
+**电脑必须装有node环境**
+
+1.浏览器打开[https://github.com/hairichuhe/test-driven](https://github.com/hairichuhe/test-driven)
+2.已压缩包的形式将代码下载到本地并解压出来
+![](img/5.png)

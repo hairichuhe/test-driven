@@ -1,6 +1,6 @@
 // src/part1/tax.js
 module.exports = {
-	calculate:function(subtotal,state.done){
+	calculate:function(){
 		//这里完成税费计算
 	}
 };
