@@ -279,5 +279,27 @@ describe('cartSummary',function(){
 **电脑必须装有node环境**
 
 1.浏览器打开[https://github.com/hairichuhe/test-driven](https://github.com/hairichuhe/test-driven)
+
 2.已压缩包的形式将代码下载到本地并解压出来
 ![](img/5.png)
+![](img/6.png)
+
+3.进入到项目目录下的node-testing文件夹中，并在当前文件夹中打开命令行
+![](img/7.png)
+![](img/8.png)
+
+4.在当前命令行中安装mocha
+```
+npm install mocha -g
+```
+![](img/9.png)
+5.在当前命令行中执行npm install 命令
+![](img/10.png)
+
+6.执行单元测试命令
+```
+mocha tests --recursive --watch
+```
+![](img/11.png)
+
+**至此就会看到三个单元测试全部通过**
